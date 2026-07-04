@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+*.local
+source-assets/
+*.mp4
+*.mov
