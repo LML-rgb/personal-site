@@ -2070,3 +2070,131 @@ img {
     radial-gradient(circle at 55% 78%, rgba(23, 52, 47, 0.58), transparent 46%),
     linear-gradient(135deg, #fff7d6 0%, #dcebb1 44%, #17342f 100%);
 }
+
+/* Mobile performance mode: keep desktop visuals, reduce touch-device compositing cost. */
+@media (max-width: 900px), (pointer: coarse) {
+  .mobile-lite .opening-animation,
+  .motion-reduced .opening-animation {
+    display: none !important;
+  }
+
+  .mobile-lite .topbar,
+  .mobile-lite .link-lightbox,
+  .mobile-lite .non-hero-background .tool-strip,
+  .mobile-lite .non-hero-background .experience-section,
+  .mobile-lite .non-hero-background .advantages-section,
+  .mobile-lite .non-hero-background .contact-section,
+  .mobile-lite .non-hero-background .tool-strip-inner,
+  .mobile-lite .non-hero-background .tool-strip span,
+  .mobile-lite .non-hero-background .stat-item,
+  .mobile-lite .non-hero-background .advantage-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .mobile-lite .grainient-page-bg {
+    display: none;
+  }
+
+  .mobile-lite .non-hero-background {
+    background:
+      radial-gradient(circle at 18% 14%, rgba(255, 244, 198, 0.72), transparent 34%),
+      radial-gradient(circle at 78% 24%, rgba(207, 255, 47, 0.24), transparent 34%),
+      linear-gradient(180deg, #f8f7ef 0%, #ffffff 44%, #f3f0e4 100%);
+  }
+
+  .mobile-lite .hero-ambient-image {
+    filter: none !important;
+    transform: none !important;
+    opacity: 0.9;
+  }
+
+  .mobile-lite .hero-section::before,
+  .mobile-lite .hero-section::after,
+  .mobile-lite .hero-wash {
+    mix-blend-mode: normal;
+  }
+
+  .mobile-lite .carousel-stage {
+    height: 312px;
+    overflow: hidden;
+    perspective: none;
+    transform-style: flat;
+  }
+
+  .mobile-lite .carousel-stage::before {
+    display: none;
+  }
+
+  .mobile-lite .carousel-ring {
+    position: absolute;
+    inset: 0;
+    transform-style: flat;
+  }
+
+  .mobile-lite .carousel-card {
+    top: 50%;
+    width: min(72vw, 286px);
+    height: 292px;
+    transform: translate(-50%, -50%);
+    transform-style: flat;
+    transition:
+      transform 260ms ease,
+      opacity 220ms ease;
+    box-shadow: 0 20px 54px rgba(23, 23, 21, 0.18);
+    will-change: auto;
+  }
+
+  .mobile-lite .carousel-card.is-left-side {
+    transform: translate(-145%, -50%) scale(0.9);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .mobile-lite .carousel-card.is-right-side {
+    transform: translate(45%, -50%) scale(0.9);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .mobile-lite .carousel-card.is-center,
+  .mobile-lite .carousel-card.is-active {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-lite .carousel-card:not(.is-active) {
+    box-shadow: none;
+  }
+
+  .mobile-lite .carousel-image-placeholder {
+    background: rgba(248, 247, 239, 0.72);
+  }
+
+  .mobile-lite .advantage-glow,
+  .mobile-lite .stat-item,
+  .mobile-lite .tool-strip span,
+  .mobile-lite .contact-actions > *,
+  .mobile-lite .contact-strip > *,
+  .mobile-lite .portrait-panel,
+  .mobile-lite .portrait-panel img,
+  .mobile-lite .contact-backdrop,
+  .mobile-lite .hero-content h1,
+  .mobile-lite .experience-copy h2,
+  .mobile-lite .section-heading h2,
+  .mobile-lite .contact-content h2 {
+    will-change: auto !important;
+    transform-style: flat !important;
+  }
+
+  .mobile-lite .advantage-glow {
+    box-shadow: 0 12px 28px rgba(23, 23, 21, 0.06);
+  }
+
+  .mobile-lite .border-glow-card::before,
+  .mobile-lite .border-glow-card::after,
+  .mobile-lite .border-glow-card > .edge-light {
+    display: none;
+  }
+}

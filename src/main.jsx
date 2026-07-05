@@ -206,9 +206,28 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [playerWork, setPlayerWork] = useState(null);
   const [qrCodeSrc, setQrCodeSrc] = useState("");
+  const [isMobileLite, setIsMobileLite] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 900px), (pointer: coarse)").matches : false,
+  );
   const [shouldLoadGrainient, setShouldLoadGrainient] = useState(false);
   const siteRef = useRef(null);
   const nonHeroRef = useRef(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px), (pointer: coarse)");
+    const updateMobileMode = () => setIsMobileLite(media.matches);
+
+    updateMobileMode();
+
+    if (media.addEventListener) {
+      media.addEventListener("change", updateMobileMode);
+      return () => media.removeEventListener("change", updateMobileMode);
+    }
+
+    media.addListener(updateMobileMode);
+    return () => media.removeListener(updateMobileMode);
+  }, []);
+
   useEffect(() => {
     if (!playerWork || isWorkLinkUnavailable(playerWork) || playerWork.qrImage) {
       setQrCodeSrc("");
@@ -245,6 +264,7 @@ function App() {
   }, [playerWork]);
 
   useEffect(() => {
+    if (isMobileLite) return undefined;
     if (shouldLoadGrainient) return undefined;
 
     const target = nonHeroRef.current;
@@ -267,7 +287,7 @@ function App() {
     observer.observe(target);
 
     return () => observer.disconnect();
-  }, [shouldLoadGrainient]);
+  }, [isMobileLite, shouldLoadGrainient]);
   const activeWork = heroWorks[activeIndex];
 
   const carouselCards = useMemo(
@@ -344,8 +364,11 @@ function App() {
     if (!root) return undefined;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion) {
+    const mobileLite = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+    if (reducedMotion || mobileLite) {
       root.classList.add("motion-reduced", "opening-complete");
+      if (mobileLite) root.classList.add("mobile-lite");
+      document.body.style.overflow = "";
       return undefined;
     }
     if (!window.location.hash) {
@@ -726,7 +749,7 @@ function App() {
     };
   }, []);
   return (
-    <main className="site-shell" ref={siteRef}>
+    <main className={`site-shell ${isMobileLite ? "mobile-lite" : ""}`.trim()} ref={siteRef}>
       <div className="opening-animation" aria-hidden="true">
         <div className="opening-panel opening-panel-left" />
         <div className="opening-panel opening-panel-right" />
@@ -787,7 +810,7 @@ function App() {
           <div className="carousel-stage" onClick={handleCarouselStageClick}>
             <div className="carousel-ring">
               {carouselCards.map((work, index) => {
-                const shouldRenderImage = work.absOffset <= 1;
+                const shouldRenderImage = isMobileLite ? work.offset === 0 : work.absOffset <= 1;
 
                 return (
                   <button
@@ -857,7 +880,7 @@ function App() {
 
       <div className="non-hero-background" ref={nonHeroRef}>
         <div className="grainient-page-bg" aria-hidden="true">
-          {shouldLoadGrainient ? (
+          {!isMobileLite && shouldLoadGrainient ? (
             <Suspense fallback={<div className="grainient-static-fallback" />}>
               <Grainient
                 color1="#fff4c6"
@@ -957,7 +980,7 @@ function App() {
               glowRadius={42}
               glowIntensity={1.15}
               coneSpread={28}
-              animated
+              animated={!isMobileLite}
               colors={["#d7ff41", "#71d7ff", "#fff2b8"]}
               fillOpacity={0.22}
             >
