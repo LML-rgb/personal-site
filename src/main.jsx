@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import QRCode from "qrcode";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -21,10 +20,11 @@ import {
   X,
 } from "lucide-react";
 import BorderGlow from "./components/BorderGlow";
-import Grainient from "./components/Grainient";
 import "./styles.css";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const Grainient = React.lazy(() => import("./components/Grainient"));
 
 const navItems = [
   { label: "经历", href: "#experience" },
@@ -206,9 +206,11 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [playerWork, setPlayerWork] = useState(null);
   const [qrCodeSrc, setQrCodeSrc] = useState("");
+  const [shouldLoadGrainient, setShouldLoadGrainient] = useState(false);
   const siteRef = useRef(null);
+  const nonHeroRef = useRef(null);
   useEffect(() => {
-    if (!playerWork || isWorkLinkUnavailable(playerWork)) {
+    if (!playerWork || isWorkLinkUnavailable(playerWork) || playerWork.qrImage) {
       setQrCodeSrc("");
       return undefined;
     }
@@ -217,15 +219,19 @@ function App() {
     const targetUrl = getWorkProjectUrl(playerWork);
 
     setQrCodeSrc("");
-    QRCode.toDataURL(targetUrl, {
-      width: 320,
-      margin: 2,
-      errorCorrectionLevel: "M",
-      color: {
-        dark: "#121210",
-        light: "#ffffff",
-      },
-    })
+    import("qrcode")
+      .then((module) => module.default || module)
+      .then((QRCode) =>
+        QRCode.toDataURL(targetUrl, {
+          width: 320,
+          margin: 2,
+          errorCorrectionLevel: "M",
+          color: {
+            dark: "#121210",
+            light: "#ffffff",
+          },
+        }),
+      )
       .then((url) => {
         if (!ignored) setQrCodeSrc(url);
       })
@@ -237,6 +243,31 @@ function App() {
       ignored = true;
     };
   }, [playerWork]);
+
+  useEffect(() => {
+    if (shouldLoadGrainient) return undefined;
+
+    const target = nonHeroRef.current;
+    if (!target) return undefined;
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoadGrainient(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldLoadGrainient(true);
+        observer.disconnect();
+      },
+      { rootMargin: "140px 0px", threshold: 0 },
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [shouldLoadGrainient]);
   const activeWork = heroWorks[activeIndex];
 
   const carouselCards = useMemo(
@@ -755,45 +786,51 @@ function App() {
           </div>
           <div className="carousel-stage" onClick={handleCarouselStageClick}>
             <div className="carousel-ring">
-              {carouselCards.map((work, index) => (
-                <button
-                  className={`carousel-card ${index === activeIndex ? "is-active" : ""} ${
-                    work.offset < 0 ? "is-left-side" : work.offset > 0 ? "is-right-side" : "is-center"
-                  }`}
-                  key={work.title}
-                  type="button"
-                  style={work.style}
-                  aria-label={
-                    work.offset === 0
-                      ? `播放${work.title}视频`
-                      : work.offset < 0
-                        ? `向左切换到${work.title}`
-                        : `向右切换到${work.title}`
-                  }
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => handleCarouselCardClick(work, index, work.offset)}
-                >
-                  <img
-                    src={work.image}
-                    alt={work.title}
-                    loading={index === activeIndex ? "eager" : "lazy"}
-                    decoding="async"
-                    fetchPriority={index === activeIndex ? "high" : "low"}
-                    draggable="false"
-                  />
-                  <span className="carousel-card-label">{work.label}</span>
-                  <span className="carousel-card-title">{work.title}</span>
-                  <span className="carousel-card-play">
-                    {work.offset === 0 ? (
-                      <ArrowUpRight size={16} />
-                    ) : work.offset < 0 ? (
-                      <ChevronLeft size={18} />
+              {carouselCards.map((work, index) => {
+                const shouldRenderImage = work.absOffset <= 1;
+
+                return (
+                  <button
+                    className={[
+                      "carousel-card",
+                      index === activeIndex ? "is-active" : "",
+                      work.offset < 0 ? "is-left-side" : work.offset > 0 ? "is-right-side" : "is-center",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    key={work.title}
+                    type="button"
+                    style={work.style}
+                    aria-label={work.title}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleCarouselCardClick(work, index, work.offset)}
+                  >
+                    {shouldRenderImage ? (
+                      <img
+                        src={work.image}
+                        alt={work.title}
+                        loading={index === activeIndex ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === activeIndex ? "high" : "low"}
+                        draggable="false"
+                      />
                     ) : (
-                      <ChevronRight size={18} />
+                      <span className="carousel-image-placeholder" aria-hidden="true" />
                     )}
-                  </span>
-                </button>
-              ))}
+                    <span className="carousel-card-label">{work.label}</span>
+                    <span className="carousel-card-title">{work.title}</span>
+                    <span className="carousel-card-play">
+                      {work.offset === 0 ? (
+                        <ArrowUpRight size={16} />
+                      ) : work.offset < 0 ? (
+                        <ChevronLeft size={18} />
+                      ) : (
+                        <ChevronRight size={18} />
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="carousel-controls" aria-label="轮播控制">
@@ -818,34 +855,40 @@ function App() {
         </div>
       </section>
 
-      <div className="non-hero-background">
+      <div className="non-hero-background" ref={nonHeroRef}>
         <div className="grainient-page-bg" aria-hidden="true">
-          <Grainient
-            color1="#fff4c6"
-            color2="#cfff2f"
-            color3="#17342f"
-            timeSpeed={0.18}
-            colorBalance={-0.08}
-            warpStrength={0.78}
-            warpFrequency={4.2}
-            warpSpeed={1.35}
-            warpAmplitude={72}
-            blendAngle={-18}
-            blendSoftness={0.13}
-            rotationAmount={260}
-            noiseScale={1.5}
-            grainAmount={0.055}
-            grainScale={2.8}
-            grainAnimated
-            fps={24}
-            maxDpr={1}
-            contrast={1.28}
-            gamma={1.02}
-            saturation={0.9}
-            centerX={0.12}
-            centerY={-0.08}
-            zoom={0.82}
-          />
+          {shouldLoadGrainient ? (
+            <Suspense fallback={<div className="grainient-static-fallback" />}>
+              <Grainient
+                color1="#fff4c6"
+                color2="#cfff2f"
+                color3="#17342f"
+                timeSpeed={0.18}
+                colorBalance={-0.08}
+                warpStrength={0.78}
+                warpFrequency={4.2}
+                warpSpeed={1.35}
+                warpAmplitude={72}
+                blendAngle={-18}
+                blendSoftness={0.13}
+                rotationAmount={260}
+                noiseScale={1.5}
+                grainAmount={0.055}
+                grainScale={2.8}
+                grainAnimated
+                fps={24}
+                maxDpr={1}
+                contrast={1.28}
+                gamma={1.02}
+                saturation={0.9}
+                centerX={0.12}
+                centerY={-0.08}
+                zoom={0.82}
+              />
+            </Suspense>
+          ) : (
+            <div className="grainient-static-fallback" />
+          )}
         </div>
 
       <section className="tool-strip" aria-label="工具能力">

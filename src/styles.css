@@ -2041,3 +2041,32 @@ img {
     will-change: auto;
   }
 }
+
+/* Performance fallbacks for deferred media and effects. */
+.carousel-image-placeholder {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 36% 24%, rgba(215, 255, 65, 0.22), transparent 32%),
+    linear-gradient(135deg, #f8f7ef 0%, #d9ddd3 44%, #131411 100%);
+}
+
+.carousel-image-placeholder::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(17, 18, 15, 0.38));
+  content: "";
+}
+
+.grainient-static-fallback {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 244, 198, 0.9), transparent 34%),
+    radial-gradient(circle at 78% 24%, rgba(207, 255, 47, 0.46), transparent 32%),
+    radial-gradient(circle at 55% 78%, rgba(23, 52, 47, 0.58), transparent 46%),
+    linear-gradient(135deg, #fff7d6 0%, #dcebb1 44%, #17342f 100%);
+}
