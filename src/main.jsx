@@ -212,6 +212,7 @@ function App() {
   const [shouldLoadGrainient, setShouldLoadGrainient] = useState(false);
   const siteRef = useRef(null);
   const nonHeroRef = useRef(null);
+  const carouselTouchRef = useRef({ x: 0, y: 0, swiping: false, didSwipe: false });
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 900px), (pointer: coarse)");
@@ -314,12 +315,42 @@ function App() {
   };
 
   const handleCarouselCardClick = (work, index, offset) => {
+    if (isMobileLite && carouselTouchRef.current.didSwipe) {
+      carouselTouchRef.current.didSwipe = false;
+      return;
+    }
+
     if (offset === 0) {
       openProjectPanel(work);
       return;
     }
 
     setActiveIndex(index);
+  };
+
+  const handleCarouselTouchStart = (event) => {
+    if (!isMobileLite) return;
+
+    const touch = event.touches?.[0];
+    if (!touch) return;
+
+    carouselTouchRef.current = { x: touch.clientX, y: touch.clientY, swiping: true, didSwipe: false };
+  };
+
+  const handleCarouselTouchEnd = (event) => {
+    if (!isMobileLite || !carouselTouchRef.current.swiping) return;
+
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - carouselTouchRef.current.x;
+    const deltaY = touch.clientY - carouselTouchRef.current.y;
+    carouselTouchRef.current.swiping = false;
+
+    if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+
+    carouselTouchRef.current.didSwipe = true;
+    moveCarousel(deltaX < 0 ? 1 : -1);
   };
 
   const handleCarouselStageClick = (event) => {
@@ -807,7 +838,12 @@ function App() {
             <strong>{activeWork.label}</strong>
             <span>{activeWork.title}</span>
           </div>
-          <div className="carousel-stage" onClick={handleCarouselStageClick}>
+          <div
+            className="carousel-stage"
+            onClick={handleCarouselStageClick}
+            onTouchStart={handleCarouselTouchStart}
+            onTouchEnd={handleCarouselTouchEnd}
+          >
             <div className="carousel-ring">
               {carouselCards.map((work, index) => {
                 const shouldRenderImage = isMobileLite ? work.offset === 0 : work.absOffset <= 1;
