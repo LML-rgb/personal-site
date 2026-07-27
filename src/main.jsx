@@ -38,61 +38,49 @@ const heroWorks = [
     title: "官印丢了",
     label: "短剧样片",
     image: "/assets/work-01-cover.webp",
-    projectUrl: "https://v.douyin.com/M20j6dPnIW0/",
-    qrImage: "/assets/work-01-douyin-qr.png",
-    qrCaption: "抖音app扫码观看",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/YlFxwWVKqiwB08k5lzNcgZ1HnoX?from=from_copylink",
     copy: "县令官印竟然弄丢了？真相竟然是",
   },
   {
     title: "量子余烬",
     label: "短剧样片",
     image: "/assets/work-02-cover.webp",
-    projectUrl: "https://v.douyin.com/8iPy8bFQRhc/",
-    qrImage: "/assets/work-02-douyin-qr.png",
-    qrCaption: "抖音app扫码观看",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/UQ5DwSOTliT9tukJYnhchVWfnLh?from=from_copylink",
     copy: "末世来临，我靠系统逆风翻盘",
   },
   {
     title: "收油工",
     label: "短剧样片",
     image: "/assets/work-03-cover.webp",
-    projectUrl: "/projects/work-03",
-    linkUnavailableText: "参赛作品，暂不展示",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/WZV1wHdk3ibgSmkxhFNcJfuMnxh?from=from_copylink",
     copy: "地沟油到航空煤油的蜕变",
   },
   {
     title: "月老不好当",
     label: "短剧样片",
     image: "/assets/work-04-cover.webp",
-    projectUrl: "https://v.douyin.com/jN7_c14tfho/",
-    qrImage: "/assets/work-04-douyin-qr.png",
-    qrCaption: "抖音 app 扫码观看",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/DLsDwkAtgiQyBckNNaZcq5T4nSb?from=from_copylink",
     copy: "月老把姻缘连错了，看其如何补救",
   },
   {
     title: "人小鬼大",
     label: "短剧样片",
     image: "/assets/work-05-cover.webp",
-    projectUrl: "https://v.douyin.com/WmN1CwKA438/",
-    qrImage: "/assets/work-05-douyin-qr.png",
-    qrCaption: "抖音 app 扫码观看",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/Vt9Aw3sbgir6PnkSFdWc9V3rn3e?from=from_copylink",
     copy: "萌宝跟随师傅隐居修炼，一出山便惊天动地",
   },
   {
     title: "鱼水谣",
     label: "短剧样片",
     image: "/assets/work-06-cover.webp",
-    projectUrl: "https://v.douyin.com/owWZG3oj95A/",
-    qrImage: "/assets/work-06-douyin-qr.png",
-    qrCaption: "抖音 app 扫码观看",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/HkhrwWS2yiLmxLkdIABcWF7Pn2V?from=from_copylink",
     copy: "抗日电视剧",
   },
   {
     title: "交易筹码",
     label: "短剧样片",
     image: "/assets/work-07-cover.webp",
-    projectUrl: "/projects/work-07",
-    linkUnavailableText: "出海短剧，不便展示",
+    projectUrl: "https://vcnlu2ucxoie.feishu.cn/wiki/J1GGwe53XictKckHMTecOtm7nCf?from=from_copylink",
     copy: "我的评价是：毁三观，拉完了",
   },
 ];
@@ -163,9 +151,6 @@ function getWorkProjectUrl(work) {
   }
 }
 
-function isWorkLinkUnavailable(work) {
-  return Boolean(work?.linkUnavailableText);
-}
 function getCarouselOffset(index, activeIndex, length) {
   let offset = index - activeIndex;
   if (offset > length / 2) offset -= length;
@@ -205,7 +190,6 @@ function getCarouselTransform(offset, length) {
 function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [playerWork, setPlayerWork] = useState(null);
-  const [qrCodeSrc, setQrCodeSrc] = useState("");
   const [isMobileLite, setIsMobileLite] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(max-width: 900px), (pointer: coarse)").matches : false,
   );
@@ -228,41 +212,6 @@ function App() {
     media.addListener(updateMobileMode);
     return () => media.removeListener(updateMobileMode);
   }, []);
-
-  useEffect(() => {
-    if (!playerWork || isWorkLinkUnavailable(playerWork) || playerWork.qrImage) {
-      setQrCodeSrc("");
-      return undefined;
-    }
-
-    let ignored = false;
-    const targetUrl = getWorkProjectUrl(playerWork);
-
-    setQrCodeSrc("");
-    import("qrcode")
-      .then((module) => module.default || module)
-      .then((QRCode) =>
-        QRCode.toDataURL(targetUrl, {
-          width: 320,
-          margin: 2,
-          errorCorrectionLevel: "M",
-          color: {
-            dark: "#121210",
-            light: "#ffffff",
-          },
-        }),
-      )
-      .then((url) => {
-        if (!ignored) setQrCodeSrc(url);
-      })
-      .catch(() => {
-        if (!ignored) setQrCodeSrc("");
-      });
-
-    return () => {
-      ignored = true;
-    };
-  }, [playerWork]);
 
   useEffect(() => {
     if (isMobileLite) return undefined;
@@ -660,6 +609,7 @@ function App() {
 
       revealToolStrip();
 
+      sectionReveal("#anime-showcase", { y: 96, duration: 1.22, start: "top 62%" });
       sectionReveal("#experience", { y: 96, duration: 1.22, start: "top 62%" });
       sectionReveal("#advantages", { y: 104, duration: 1.24, start: "top 62%" });
       sectionReveal("#contact", {
@@ -670,10 +620,17 @@ function App() {
         start: "top 70%",
       });
 
+      revealTitle("#anime-showcase .anime-showcase-copy h2", ".anime-showcase-copy");
       revealTitle("#experience .experience-copy h2", ".experience-copy");
       revealTitle("#advantages .section-heading h2", "#advantages .section-heading");
       revealTitle("#contact .contact-content h2", "#contact .contact-content");
 
+      staggerReveal("#anime-showcase .anime-showcase-copy > p, #anime-showcase .anime-showcase-copy > a", ".anime-showcase-copy", {
+        y: 40,
+        duration: 0.96,
+        ease: "power3.out",
+        stagger: 0.12,
+      });
       staggerReveal("#experience .contact-strip > *", "#experience .contact-strip", { y: 28, stagger: 0.05, start: "top 86%" });
       staggerReveal("#experience .stat-item", "#experience .stat-grid", { y: 70, rotateX: -8, stagger: 0.1 });
       staggerReveal("#advantages .advantage-glow", "#advantages .advantage-grid", {
@@ -724,6 +681,36 @@ function App() {
         duration: 0.95,
         ease: "power3.out",
         stagger: 0.1,
+      });
+
+      gsap.set(".anime-showcase-media", { clipPath: "inset(0 0 0 100%)", x: 38 });
+      runWhenVisible(".anime-showcase-layout", () => {
+        gsap.to(".anime-showcase-media", {
+          clipPath: "inset(0 0 0 0%)",
+          x: 0,
+          duration: 1.28,
+          ease: "expo.out",
+        });
+      });
+
+      gsap.set(".anime-showcase-media img", { scale: 1.16, xPercent: 6 });
+      runWhenVisible(".anime-showcase-layout", () => {
+        gsap.to(".anime-showcase-media img", {
+          scale: 1,
+          xPercent: 0,
+          duration: 0.96,
+          ease: "power4.out",
+        });
+      });
+      gsap.to(".anime-showcase-media img", {
+        yPercent: -5,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#anime-showcase",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 0.8,
+        },
       });
 
       gsap.set(".portrait-panel", { clipPath: "inset(0 100% 0 0)", x: -38 });
@@ -958,6 +945,33 @@ function App() {
         </div>
       </section>
 
+      <section id="anime-showcase" className="content-section anime-showcase-section">
+        <div className="section-inner anime-showcase-layout">
+          <div className="anime-showcase-copy">
+            <h2>AI漫剧样片</h2>
+            <p className="anime-showcase-style">AI漫剧-3D国漫风格</p>
+            <a
+              className="primary-button anime-showcase-link"
+              href="https://vcnlu2ucxoie.feishu.cn/wiki/NZBRw0XaTirVvdk5l8SccVzInNb?from=from_copylink"
+              target="_blank"
+              rel="noreferrer"
+            >
+              点击链接观看
+              <ArrowUpRight size={20} />
+            </a>
+          </div>
+
+          <div className="anime-showcase-media">
+            <img
+              src="/assets/ai-anime-sample.webp"
+              alt="《无限异兽》AI漫剧样片视觉图"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </section>
+
       <section id="experience" className="content-section experience-section">
         <div className="section-inner experience-layout">
           <div className="portrait-panel">
@@ -1078,10 +1092,6 @@ function App() {
                 <p className="work-link-kicker">项目入口</p>
                 <h3>{playerWork.title}</h3>
                 <p>{playerWork.copy}</p>
-                {isWorkLinkUnavailable(playerWork) ? (
-                  <p className="work-link-url is-disabled">{playerWork.linkUnavailableText}</p>
-                ) : (
-                  <>
                 <a className="work-link-url" href={getWorkProjectUrl(playerWork)} target="_blank" rel="noreferrer">
                   {getWorkProjectUrl(playerWork)}
                 </a>
@@ -1094,20 +1104,6 @@ function App() {
                     复制链接
                   </button>
                 </div>
-                  </>
-                )}
-              </div>
-              <div className="work-qr-panel">
-                {isWorkLinkUnavailable(playerWork) ? (
-                  <span className="work-qr-note">{playerWork.linkUnavailableText}</span>
-                ) : playerWork.qrImage ? (
-                  <img src={playerWork.qrImage} alt={`${playerWork.title}二维码`} />
-                ) : qrCodeSrc ? (
-                  <img src={qrCodeSrc} alt={`${playerWork.title}二维码`} />
-                ) : (
-                  <span>二维码生成中</span>
-                )}
-                <p>{isWorkLinkUnavailable(playerWork) ? "作品链接暂不展示" : playerWork.qrCaption || "手机扫码查看"}</p>
               </div>
             </div>
           </div>
