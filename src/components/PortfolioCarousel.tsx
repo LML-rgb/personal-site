@@ -169,9 +169,9 @@ export default function PortfolioCarousel() {
       <div
         ref={viewportRef}
         className="pc-viewport"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocusCapture={() => setFocused(true)}
+        onPointerEnter={(event) => { if (event.pointerType === 'mouse') setHovered(true); }}
+        onPointerLeave={(event) => { if (event.pointerType === 'mouse') setHovered(false); }}
+        onFocusCapture={(event) => setFocused(event.target instanceof HTMLElement && event.target.matches(':focus-visible'))}
         onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}
         onPointerDown={() => { pointerDownRef.current = true; pauseForInteraction(); }}
         onPointerUp={resumeAfterInteraction}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import './readability.css'
+import './mobile-performance.css'
 
 // Keep the original fonts without making first paint wait for an external stylesheet.
 const fontStyles = document.getElementById('portfolio-fonts') as HTMLLinkElement | null

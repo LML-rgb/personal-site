@@ -6,3 +6,13 @@
   background: radial-gradient(circle, #8caac72b 1px, transparent 1.5px) 0 0 / 13px 13px;
   mask-image: radial-gradient(ellipse, #0009, transparent 75%);
 }
+.pattern-preview-line {
+  background: repeating-linear-gradient(174deg, transparent 0 23px, #7897b022 24px, transparent 25px 48px);
+}
+.pattern-preview-square {
+  background: conic-gradient(from 90deg at 1px 1px, transparent 90deg, #8caac71c 0) 0 0 / 18px 18px;
+}
+.pattern-preview-plus {
+  background: radial-gradient(ellipse at 70% 30%, #a0b6c918, transparent 70%),
+    radial-gradient(circle, #a0b6c926 1px, transparent 1.5px) 0 0 / 24px 24px;
+}

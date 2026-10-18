@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import useLiteMotion from '../hooks/useLiteMotion'
 import type { PatternWavesProps } from './PatternWaves'
 import PatternWaves from './DeferredPatternWaves'
 import TwinklingSquares from './TwinklingSquares'
@@ -32,10 +33,11 @@ export default function SectionPatternBackground({ variant }: { variant: Section
   const host = useRef<HTMLDivElement>(null)
   const [activated, setActivated] = useState(false)
   const reduced = useReducedMotion()
+  const lite = useLiteMotion()
 
   useEffect(() => {
     const element = host.current
-    if (!element) return
+    if (!element || lite) return
     // Initialize once near the section. PatternWaves pauses offscreen itself;
     // keeping it mounted avoids compiling shaders again on every return visit.
     const observer = new IntersectionObserver(([entry]) => {
@@ -45,11 +47,11 @@ export default function SectionPatternBackground({ variant }: { variant: Section
     }, { rootMargin: '180px 0px' })
     observer.observe(element)
     return () => observer.disconnect()
-  }, [])
+  }, [lite])
 
   return <div ref={host} className={`section-pattern-background section-pattern-${variant}`} aria-hidden="true">
     <div className="section-pattern-surface">
-      {activated && <PatternWaves
+      {(lite || activated) && <PatternWaves
         {...variants[variant]} backgroundColor="transparent" intro={false}
         maxFps={30}
         paused={!!reduced} interactive={!reduced} cursorSize={70} cursorStrength={.4}

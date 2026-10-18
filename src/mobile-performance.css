@@ -1,0 +1,29 @@
+/* Match useLiteMotion, including landscape touch devices. Keep the carousel's
+   scrolling/breathing controls independent from the decorative motion policy. */
+@media (max-width: 900px), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ph-copy:not(.is-ready) > *,
+  .ph-copy.is-ready > * {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .ph-background::before { filter: none; }
+  .pattern-preview { mask-image: none; opacity: .4; }
+  .section-pattern-surface {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    max-height: none;
+  }
+  .glow-card-static { position: relative; min-width: 0; box-shadow: none; }
+  .pattern-section *,
+  .pattern-section::before,
+  .pattern-section::after { animation: none !important; transition: none !important; }
+  .marquee-track { transform: none !important; }
+  .marquee-viewport { mask-image: none; }
+  .nav-wrap .floating-nav,
+  .pc-controls > button { backdrop-filter: none; -webkit-backdrop-filter: none; background: #10151bf5; }
+  .nav-wrap * { transition: none; }
+  .nav-wrap .logo-ring:hover { transform: none; }
+}

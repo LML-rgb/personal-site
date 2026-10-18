@@ -6,13 +6,14 @@ import PortfolioHome from './components/PortfolioHome'
 import ResumeSection from './components/ResumeSection'
 import SectionPatternBackground from './components/SectionPatternBackground'
 import GlowCard from './components/GlowCard'
+import useLiteMotion, { isLiteMotion } from './hooks/useLiteMotion'
 
 const EMAIL = '2447325248@qq.com'
 const RESUME = '/Liu-Maolin-Resume.docx'
 const INTRO_KEY = 'lm-portfolio-intro-seen'
 
 function shouldShowIntro() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !['', '#home'].includes(location.hash)) return false
+  if (isLiteMotion() || !['', '#home'].includes(location.hash)) return false
   try { return !sessionStorage.getItem(INTRO_KEY) } catch { return true }
 }
 
@@ -85,8 +86,9 @@ function Navbar() {
 }
 
 function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
-  const reduced = useReducedMotion()
-  return <motion.div className={className} initial={reduced ? false : { opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: .8, delay, ease: [.25, .1, .25, 1] }} viewport={{ once: true, margin: '-60px' }}>{children}</motion.div>
+  const lite = useLiteMotion()
+  if (lite) return <div className={className}>{children}</div>
+  return <motion.div className={className} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: .8, delay, ease: [.25, .1, .25, 1] }} viewport={{ once: true, margin: '-60px' }}>{children}</motion.div>
 }
 
 const processSteps = [
@@ -111,10 +113,10 @@ function Contact() {
   const [copied, setCopied] = useState(false)
   const [copyError, setCopyError] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const reduced = useReducedMotion()
+  const lite = useLiteMotion()
   useEffect(() => {
     const element = track.current
-    if (reduced || !element) return
+    if (lite || !element) return
     let inView = false
     let disposed = false
     let requested = false
@@ -139,7 +141,7 @@ function Contact() {
     observer.observe(element)
     document.addEventListener('visibilitychange', sync)
     return () => { disposed = true; observer.disconnect(); document.removeEventListener('visibilitychange', sync); kill?.() }
-  }, [reduced])
+  }, [lite])
   useEffect(() => () => clearTimeout(timer.current), [])
   async function copyEmail() {
     try { await navigator.clipboard.writeText(EMAIL); setCopied(true); setCopyError(false); clearTimeout(timer.current); timer.current = setTimeout(() => setCopied(false), 2200) }
@@ -147,7 +149,7 @@ function Contact() {
   }
   return <footer id="contact" className="contact-section pattern-section"><SectionPatternBackground variant="contact" />
     <div className="contact-content section-shell"><Reveal><div className="eyebrow"><span className="eyebrow-line" /> LET'S MAKE SOMETHING GREAT / 04</div><h2>下一个故事，<br /><em>一起开始。</em></h2><p>寻找 AI 短剧编导与全流程制作机会。<br />欢迎聊聊你的项目，或一个有意思的想法。</p><div className="contact-email"><a className="pill-button primary" href={`mailto:${EMAIL}`}><Mail size={17} /> {EMAIL} <ArrowUpRight size={17} /></a><button className="copy-button" onClick={copyEmail} aria-label={copied ? '邮箱已复制' : '复制邮箱'} title={copied ? '已复制' : '复制邮箱'}>{copied ? <Check size={17} /> : <Copy size={17} />}</button></div><div className="copy-feedback" role="status">{copied ? '邮箱已复制' : copyError ? '请直接点击邮箱发送邮件，或选中邮箱复制。' : ''}</div><a className="contact-phone" href="tel:+8615725751655"><Phone size={13} />157 2575 1655</a></Reveal></div>
-    <div className="marquee-viewport" aria-hidden="true"><div className="marquee-track" ref={track}>{Array.from({ length: 10 }, (_, i) => <span key={i}>STORIES INTO <em>FRAMES.</em><b>✳</b></span>)}</div></div>
+    <div className="marquee-viewport" aria-hidden="true"><div className="marquee-track" ref={track}>{Array.from({ length: lite ? 1 : 10 }, (_, i) => <span key={i}>STORIES INTO <em>FRAMES.</em><b>✳</b></span>)}</div></div>
     <div className="footer-bar section-shell"><a href="#home" className="footer-brand">Liu <em>Maolin.</em></a><span>© 2026 刘茂林</span><a className="footer-download" href={RESUME} download="刘茂林_简历.docx">简历 <ArrowDownToLine size={13} /></a><span className="tiny-status"><i /> 期待新的创作机会</span><a href="#home" className="back-top" aria-label="回到顶部"><ArrowUpRight size={17} /></a></div>
   </footer>
 }
@@ -157,7 +159,8 @@ const finishLoading = (setter: (v: boolean) => void) => () => {
   setter(false)
 }
 export default function App() {
+  const lite = useLiteMotion()
   const [loading, setLoading] = useState(shouldShowIntro)
   const complete = useRef(finishLoading(setLoading)).current
-  return <MotionConfig reducedMotion="user"><a href="#work" className="skip-link">跳至作品</a><AnimatePresence>{loading && <LoadingScreen onComplete={complete} />}</AnimatePresence><Navbar /><main><PortfolioHome loaded={!loading} /><Process /><ResumeSection /></main><Contact /></MotionConfig>
+  return <MotionConfig reducedMotion="user"><a href="#work" className="skip-link">跳至作品</a><AnimatePresence>{loading && !lite && <LoadingScreen onComplete={complete} />}</AnimatePresence><Navbar /><main><PortfolioHome loaded={!loading || lite} /><Process /><ResumeSection /></main><Contact /></MotionConfig>
 }

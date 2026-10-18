@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import useLiteMotion from '../hooks/useLiteMotion'
 import { homeBackground } from '../data/site'
 import PortfolioCarousel from './PortfolioCarousel'
 import TwinklingSquares from './TwinklingSquares'
@@ -9,11 +9,11 @@ import './PortfolioHome.css'
 export default function PortfolioHome({ loaded }: { loaded: boolean }) {
   const root = useRef<HTMLElement>(null)
   const video = useRef<HTMLVideoElement>(null)
-  const reduced = useReducedMotion()
+  const lite = useLiteMotion()
 
   useEffect(() => {
     const element = video.current
-    if (!element || reduced || !loaded) return
+    if (!element || lite || !loaded) return
     let inView = false
     const syncPlayback = () => {
       if (inView && !document.hidden) void element.play().catch(() => {})
@@ -26,20 +26,20 @@ export default function PortfolioHome({ loaded }: { loaded: boolean }) {
     observer.observe(element)
     document.addEventListener('visibilitychange', syncPlayback)
     return () => { observer.disconnect(); document.removeEventListener('visibilitychange', syncPlayback); element.pause() }
-  }, [reduced, loaded])
+  }, [lite, loaded])
 
   return <section id="home" className="portfolio-home" ref={root} aria-labelledby="ph-title">
     <div className="ph-background" aria-hidden="true">
       {homeBackground.poster && <img className="ph-background-media" src={homeBackground.poster} alt="" />}
-      {homeBackground.video && !reduced && <video ref={video} className="ph-background-media" src={homeBackground.video} poster={homeBackground.poster || undefined} muted playsInline loop preload="none" tabIndex={-1} />}
+      {homeBackground.video && !lite && <video ref={video} className="ph-background-media" src={homeBackground.video} poster={homeBackground.poster || undefined} muted playsInline loop preload="none" tabIndex={-1} />}
       <PatternWaves
         preset="silk" pattern="square" spacing={13} markSize={.78}
         color="#8caac7" backgroundColor="transparent" opacity={.68}
         depth={.95} shine={.7} light={25} contrast={1.3}
         speed={.55} scale={1.1} direction={20}
         fade="edges" fadeSize={.45}
-        interactive={loaded && !reduced} cursorSize={75} cursorStrength={.6}
-        intro={!reduced} paused={!loaded || !!reduced}
+        interactive={loaded && !lite} cursorSize={75} cursorStrength={.6}
+        intro={!lite} paused={!loaded || lite}
         fallback={<TwinklingSquares />}
       />
       <div className="ph-background-shade" />
