@@ -4,6 +4,7 @@ import App from './App'
 import './index.css'
 import './readability.css'
 import './mobile-performance.css'
+import './resume-download.css'
 
 // Keep the original fonts without making first paint wait for an external stylesheet.
 const fontStyles = document.getElementById('portfolio-fonts') as HTMLLinkElement | null

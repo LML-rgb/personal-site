@@ -19,7 +19,7 @@ pnpm run dev
 
 ## 个人信息
 
-首页排版在 `src/components/PortfolioHome.tsx`，轮播在 `src/components/PortfolioCarousel.tsx`，履历在 `src/components/ResumeSection.tsx`，联系方式在 `src/App.tsx`。简历下载文件为 `public/Liu-Maolin-Resume.docx`，原始 DOCX 未修改。源简历公司名称末尾存在截断，网页使用简称“绘梦文化传媒”。作品平均播放量 300 万+、1 年经验均按用户提供简历呈现。
+首页排版在 `src/components/PortfolioHome.tsx`，轮播在 `src/components/PortfolioCarousel.tsx`，履历在 `src/components/ResumeSection.tsx`，联系方式在 `src/App.tsx`。简历下载文件为 `public/Liu-Maolin-Resume.pdf`，使用用户上传的《刘茂林_简历版.pdf》，文件内容原样保留。源简历公司名称末尾存在截断，网页使用简称“绘梦文化传媒”。作品平均播放量 300 万+、1 年经验均按用户提供简历呈现。
 
 ## 替换首页背景视频
 

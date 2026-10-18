@@ -1,0 +1,58 @@
+.footer-resume-shell { position: relative; z-index: 2; margin-top: 34px; }
+.footer-resume-download {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 138px;
+  padding: 28px;
+  border: 1px solid #607e98;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #1b2a38, #111b24);
+  color: #f2f6fa;
+  text-align: left;
+}
+.footer-resume-icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border: 1px solid #6989a3;
+  border-radius: 16px;
+  background: #b7d3eb12;
+  color: #d0e5f6;
+}
+.footer-resume-copy { display: grid; gap: 8px; min-width: 0; }
+.footer-resume-copy strong { font-size: 27px; font-weight: 750; line-height: 1.4; letter-spacing: -.02em; }
+.footer-resume-copy > span { color: #bdcbd7; font-size: 15px; line-height: 1.6; }
+.footer-resume-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-width: 208px;
+  min-height: 64px;
+  padding: 16px 26px;
+  border-radius: 12px;
+  background: #e7f0f8;
+  color: #101c27;
+  font-size: 21px;
+  font-weight: 750;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.footer-resume-download:focus-visible { outline: 3px solid #bcdcf5; outline-offset: 5px; }
+@media (hover: hover) and (pointer: fine) {
+  .footer-resume-download:hover { border-color: #b2cfe5; background: linear-gradient(120deg, #24384a, #16232f); }
+  .footer-resume-download:hover .footer-resume-action { background: #fff; }
+}
+@media (max-width: 700px) {
+  .footer-resume-shell { margin-top: 28px; }
+  .footer-resume-download { grid-template-columns: 48px minmax(0, 1fr); gap: 18px 14px; padding: 22px; border-radius: 16px; }
+  .footer-resume-icon { width: 48px; height: 52px; border-radius: 12px; }
+  .footer-resume-icon svg { width: 27px; height: 27px; }
+  .footer-resume-copy { gap: 5px; }
+  .footer-resume-copy strong { font-size: 20px; }
+  .footer-resume-copy > span { font-size: 13px; }
+  .footer-resume-action { grid-column: 1 / -1; justify-content: space-between; width: 100%; min-width: 0; min-height: 56px; padding: 13px 20px; font-size: 19px; }
+}

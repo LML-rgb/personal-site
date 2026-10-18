@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from 'framer-motion'
-import { ArrowDownToLine, ArrowUpRight, Check, Clapperboard, Copy, Film, Mail, MonitorPlay, Phone, Sparkles } from 'lucide-react'
+import { ArrowDownToLine, ArrowUpRight, Check, Clapperboard, Copy, FileText, Film, Mail, MonitorPlay, Phone, Sparkles } from 'lucide-react'
 import PortfolioHome from './components/PortfolioHome'
 import ResumeSection from './components/ResumeSection'
 import SectionPatternBackground from './components/SectionPatternBackground'
 import GlowCard from './components/GlowCard'
 import useLiteMotion, { isLiteMotion } from './hooks/useLiteMotion'
+import { resumeDownload } from './data/resume'
 
 const EMAIL = '2447325248@qq.com'
-const RESUME = '/Liu-Maolin-Resume.docx'
 const INTRO_KEY = 'lm-portfolio-intro-seen'
 
 function shouldShowIntro() {
@@ -150,7 +150,14 @@ function Contact() {
   return <footer id="contact" className="contact-section pattern-section"><SectionPatternBackground variant="contact" />
     <div className="contact-content section-shell"><Reveal><div className="eyebrow"><span className="eyebrow-line" /> LET'S MAKE SOMETHING GREAT / 04</div><h2>下一个故事，<br /><em>一起开始。</em></h2><p>寻找 AI 短剧编导与全流程制作机会。<br />欢迎聊聊你的项目，或一个有意思的想法。</p><div className="contact-email"><a className="pill-button primary" href={`mailto:${EMAIL}`}><Mail size={17} /> {EMAIL} <ArrowUpRight size={17} /></a><button className="copy-button" onClick={copyEmail} aria-label={copied ? '邮箱已复制' : '复制邮箱'} title={copied ? '已复制' : '复制邮箱'}>{copied ? <Check size={17} /> : <Copy size={17} />}</button></div><div className="copy-feedback" role="status">{copied ? '邮箱已复制' : copyError ? '请直接点击邮箱发送邮件，或选中邮箱复制。' : ''}</div><a className="contact-phone" href="tel:+8615725751655"><Phone size={13} />157 2575 1655</a></Reveal></div>
     <div className="marquee-viewport" aria-hidden="true"><div className="marquee-track" ref={track}>{Array.from({ length: lite ? 1 : 10 }, (_, i) => <span key={i}>STORIES INTO <em>FRAMES.</em><b>✳</b></span>)}</div></div>
-    <div className="footer-bar section-shell"><a href="#home" className="footer-brand">Liu <em>Maolin.</em></a><span>© 2026 刘茂林</span><a className="footer-download" href={RESUME} download="刘茂林_简历.docx">简历 <ArrowDownToLine size={13} /></a><span className="tiny-status"><i /> 期待新的创作机会</span><a href="#home" className="back-top" aria-label="回到顶部"><ArrowUpRight size={17} /></a></div>
+    <div className="footer-resume-shell section-shell">
+      <a className="footer-resume-download" href={resumeDownload.url} download={resumeDownload.filename} aria-label="下载刘茂林简历（PDF）">
+        <span className="footer-resume-icon" aria-hidden="true"><FileText size={32} strokeWidth={1.5} /></span>
+        <span className="footer-resume-copy"><strong>下载我的完整简历</strong><span>刘茂林 · AI 短剧编导 · PDF 文件</span></span>
+        <span className="footer-resume-action">下载简历 <ArrowDownToLine size={24} aria-hidden="true" /></span>
+      </a>
+    </div>
+    <div className="footer-bar section-shell"><a href="#home" className="footer-brand">Liu <em>Maolin.</em></a><span>© 2026 刘茂林</span><span className="tiny-status"><i /> 期待新的创作机会</span><a href="#home" className="back-top" aria-label="回到顶部"><ArrowUpRight size={17} /></a></div>
   </footer>
 }
 

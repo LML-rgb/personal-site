@@ -1,9 +1,8 @@
 import { ArrowDownToLine, ArrowUpRight } from 'lucide-react'
 import SectionPatternBackground from './SectionPatternBackground'
 import GlowCard from './GlowCard'
+import { resumeDownload } from '../data/resume'
 import './ResumeSection.css'
-
-const RESUME_DOWNLOAD = '/Liu-Maolin-Resume.docx'
 
 export default function ResumeSection() {
   return (
@@ -15,7 +14,7 @@ export default function ResumeSection() {
           <p className="resume-r-eyebrow"><span aria-hidden="true" /> 关于我 / 03</p>
           <h2 id="resume-r-title">关于我，<span>与我的经历。</span></h2>
         </div>
-        <a className="resume-r-download" href={RESUME_DOWNLOAD} download="刘茂林_简历.docx">
+        <a className="resume-r-download" href={resumeDownload.url} download={resumeDownload.filename}>
           下载简历 <ArrowDownToLine size={19} aria-hidden="true" />
         </a>
       </div>
