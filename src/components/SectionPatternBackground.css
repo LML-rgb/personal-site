@@ -4,12 +4,24 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  overflow: hidden;
+  overflow: clip;
   pointer-events: none;
   user-select: none;
   background: #090d11;
 }
-.section-pattern-background > .pattern-waves { position: absolute; inset: 0; }
+/* A sticky, viewport-sized surface follows long sections without drawing their
+   offscreen area. clip, unlike hidden, does not create a sticky scroll container. */
+.section-pattern-surface {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  max-height: 100%;
+  overflow: hidden;
+}
+.section-pattern-surface > .pattern-waves { position: absolute; inset: 0; }
+.contact-section.pattern-section { overflow: clip; }
 .section-pattern-shade {
   position: absolute;
   inset: 0;

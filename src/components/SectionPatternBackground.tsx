@@ -30,27 +30,32 @@ const variants: Record<SectionVariant, PatternWavesProps> = {
 
 export default function SectionPatternBackground({ variant }: { variant: SectionVariant }) {
   const host = useRef<HTMLDivElement>(null)
-  const [nearViewport, setNearViewport] = useState(false)
+  const [activated, setActivated] = useState(false)
   const reduced = useReducedMotion()
 
   useEffect(() => {
     const element = host.current
     if (!element) return
-    // Allocate additional WebGL surfaces only near the visible section.
+    // Initialize once near the section. PatternWaves pauses offscreen itself;
+    // keeping it mounted avoids compiling shaders again on every return visit.
     const observer = new IntersectionObserver(([entry]) => {
-      setNearViewport(entry.isIntersecting)
+      if (!entry.isIntersecting) return
+      setActivated(true)
+      observer.disconnect()
     }, { rootMargin: '180px 0px' })
     observer.observe(element)
     return () => observer.disconnect()
   }, [])
 
   return <div ref={host} className={`section-pattern-background section-pattern-${variant}`} aria-hidden="true">
-    {nearViewport && <PatternWaves
-      {...variants[variant]} backgroundColor="transparent" intro={false}
-      maxFps={30}
-      paused={!!reduced} interactive={!reduced} cursorSize={70} cursorStrength={.4}
-      fallback={<TwinklingSquares />}
-    />}
+    <div className="section-pattern-surface">
+      {activated && <PatternWaves
+        {...variants[variant]} backgroundColor="transparent" intro={false}
+        maxFps={30}
+        paused={!!reduced} interactive={!reduced} cursorSize={70} cursorStrength={.4}
+        fallback={<TwinklingSquares />}
+      />}
+    </div>
     <div className="section-pattern-shade" />
   </div>
 }

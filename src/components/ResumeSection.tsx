@@ -58,13 +58,13 @@ export default function ResumeSection() {
               <li><strong>提示词优化：</strong>通过智能体优化提示词，提升画面稳定性与表现力。</li>
             </ul>
           </div>
-          <GlowCard className="resume-r-result" label="作品成果" radius={14}>
+          <div className="resume-r-result" aria-label="作品成果">
             <span className="resume-r-result-label">作品平均播放量</span>
             <p className="resume-r-result-number">300<span>万+</span></p>
             <div className="resume-r-account">
               <span>抖音号</span><strong>38850125710</strong>
             </div>
-          </GlowCard>
+          </div>
         </GlowCard>
       </div>
 

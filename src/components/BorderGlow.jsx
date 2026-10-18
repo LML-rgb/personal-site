@@ -21,18 +21,12 @@ function buildGlowVars(glowColor, intensity) {
   return vars;
 }
 
-const GRADIENT_POSITIONS = ['80% 55%', '69% 34%', '8% 6%', '41% 38%', '86% 85%', '82% 18%', '51% 4%'];
-const GRADIENT_KEYS = ['--gradient-one', '--gradient-two', '--gradient-three', '--gradient-four', '--gradient-five', '--gradient-six', '--gradient-seven'];
-const COLOR_MAP = [0, 1, 2, 0, 1, 2, 1];
-
 function buildGradientVars(colors) {
-  const vars = {};
-  for (let i = 0; i < 7; i++) {
-    const c = colors[Math.min(COLOR_MAP[i], colors.length - 1)];
-    vars[GRADIENT_KEYS[i]] = `radial-gradient(at ${GRADIENT_POSITIONS[i]}, ${c} 0px, transparent 50%)`;
-  }
-  vars['--gradient-base'] = `linear-gradient(${colors[0]} 0 100%)`;
-  return vars;
+  return {
+    '--glow-start': colors[0],
+    '--glow-mid': colors[1] || colors[0],
+    '--glow-end': colors[2] || colors[0],
+  };
 }
 
 function isLightColor(color) {
@@ -48,20 +42,29 @@ function isLightColor(color) {
 function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
 function easeInCubic(x) { return x * x * x; }
 
-function animateValue({ start = 0, end = 100, duration = 1000, delay = 0, ease = easeOutCubic, onUpdate, onEnd }) {
-  const t0 = performance.now() + delay;
+// One 30 Hz timeline replaces four independent RAF chains. Only the decorative
+// highlight is throttled; the transform-based hover lift remains compositor driven.
+function animateSweep(card, onEnd) {
+  const start = performance.now();
+  let lastPaint = -Infinity;
   let frame = 0;
-  let cancelled = false;
-  function tick() {
-    if (cancelled) return;
-    const elapsed = performance.now() - t0;
-    const t = Math.max(0, Math.min(elapsed / duration, 1));
-    onUpdate(start + (end - start) * ease(t));
-    if (t < 1) frame = requestAnimationFrame(tick);
-    else if (onEnd) onEnd();
+  const unit = value => Math.max(0, Math.min(value, 1));
+  function tick(now) {
+    const elapsed = Math.min(now - start, 4000);
+    if (now - lastPaint >= 1000 / 30 - .5 || elapsed === 4000) {
+      lastPaint = now;
+      const edge = elapsed < 500 ? easeOutCubic(unit(elapsed / 500)) * 100
+        : elapsed < 2500 ? 100 : (1 - easeInCubic(unit((elapsed - 2500) / 1500))) * 100;
+      const angle = elapsed < 1500 ? easeInCubic(unit(elapsed / 1500)) * .5
+        : .5 + easeOutCubic(unit((elapsed - 1500) / 2250)) * .5;
+      card.style.setProperty('--edge-proximity', edge.toFixed(2));
+      card.style.setProperty('--cursor-angle', `${(110 + 355 * angle).toFixed(2)}deg`);
+    }
+    if (elapsed < 4000) frame = requestAnimationFrame(tick);
+    else onEnd();
   }
-  const timer = setTimeout(() => { frame = requestAnimationFrame(tick); }, delay);
-  return () => { cancelled = true; clearTimeout(timer); cancelAnimationFrame(frame); };
+  frame = requestAnimationFrame(tick);
+  return () => cancelAnimationFrame(frame);
 }
 
 const BorderGlow = ({
@@ -139,13 +142,11 @@ const BorderGlow = ({
     if (!animated || !cardRef.current) return;
     const card = cardRef.current;
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const angleStart = 110;
-    const angleEnd = 465;
     let played = false;
-    let animations = [];
+    let cancelAnimation = () => {};
     const stop = () => {
-      animations.forEach(cancel => cancel());
-      animations = [];
+      cancelAnimation();
+      cancelAnimation = () => {};
       card.classList.remove('sweep-active');
     };
     cancelSweepRef.current = stop;
@@ -154,20 +155,8 @@ const BorderGlow = ({
       played = true;
       if (interactingRef.current) return;
       card.classList.add('sweep-active');
-      card.style.setProperty('--cursor-angle', `${angleStart}deg`);
-      animations = [
-        animateValue({ duration: 500, onUpdate: v => card.style.setProperty('--edge-proximity', v) }),
-        animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => {
-          card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
-        }}),
-        animateValue({ ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => {
-          card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
-        }}),
-        animateValue({ ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
-          onUpdate: v => card.style.setProperty('--edge-proximity', v),
-          onEnd: () => card.classList.remove('sweep-active'),
-        }),
-      ];
+      card.style.setProperty('--cursor-angle', '110deg');
+      cancelAnimation = animateSweep(card, () => card.classList.remove('sweep-active'));
     };
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) play();
