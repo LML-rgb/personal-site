@@ -1,0 +1,8 @@
+.pattern-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle, #8caac72b 1px, transparent 1.5px) 0 0 / 13px 13px;
+  mask-image: radial-gradient(ellipse, #0009, transparent 75%);
+}

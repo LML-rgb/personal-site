@@ -1,0 +1,36 @@
+.pattern-section { position: relative; isolation: isolate; }
+.section-pattern-content { position: relative; }
+.section-pattern-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  background: #090d11;
+}
+.section-pattern-background > .pattern-waves { position: absolute; inset: 0; }
+.section-pattern-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0a0a0a 0%, #090c1022 13%, #090c100d 70%, #0a0a0a 100%);
+}
+.section-pattern-resume { background: #080c10; }
+.section-pattern-resume .section-pattern-shade {
+  background: linear-gradient(180deg, #0a0a0a, #080b0e11 10%, #080b0e22 85%, #0a0a0a);
+}
+.section-pattern-contact { background: #0a0e13; }
+.section-pattern-contact .section-pattern-shade {
+  background: radial-gradient(ellipse at 50% 42%, #080b0e80, transparent 65%),
+    linear-gradient(180deg, #0a0a0a, transparent 20%, #080b0e33 80%, #080b0e);
+}
+
+/* Dark translucent panels preserve contrast over the moving surface. */
+.pattern-section .advantage-card {
+  background: linear-gradient(145deg, #181e24e8, #111417d9 70%);
+}
+.pattern-section .resume-r-profile {
+  background: linear-gradient(125deg, #171d23ed, #101417e3 65%, #101214e3);
+}
+.pattern-section .resume-r-project,
+.pattern-section .resume-r-detail-card { background: #111416e8; }

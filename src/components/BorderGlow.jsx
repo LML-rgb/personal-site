@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import "./BorderGlow.css";
+'use client';
+
+import { useRef, useCallback, useEffect } from 'react';
+import './BorderGlow.css';
 
 function parseHSL(hslStr) {
   const match = hslStr.match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
@@ -11,232 +13,206 @@ function buildGlowVars(glowColor, intensity) {
   const { h, s, l } = parseHSL(glowColor);
   const base = `${h}deg ${s}% ${l}%`;
   const opacities = [100, 60, 50, 40, 30, 20, 10];
-  const keys = ["", "-60", "-50", "-40", "-30", "-20", "-10"];
+  const keys = ['', '-60', '-50', '-40', '-30', '-20', '-10'];
   const vars = {};
-
-  for (let index = 0; index < opacities.length; index += 1) {
-    vars[`--glow-color${keys[index]}`] = `hsl(${base} / ${Math.min(opacities[index] * intensity, 100)}%)`;
+  for (let i = 0; i < opacities.length; i++) {
+    vars[`--glow-color${keys[i]}`] = `hsl(${base} / ${Math.min(opacities[i] * intensity, 100)}%)`;
   }
-
   return vars;
 }
 
-const GRADIENT_POSITIONS = ["80% 55%", "69% 34%", "8% 6%", "41% 38%", "86% 85%", "82% 18%", "51% 4%"];
-const GRADIENT_KEYS = ["--gradient-one", "--gradient-two", "--gradient-three", "--gradient-four", "--gradient-five", "--gradient-six", "--gradient-seven"];
+const GRADIENT_POSITIONS = ['80% 55%', '69% 34%', '8% 6%', '41% 38%', '86% 85%', '82% 18%', '51% 4%'];
+const GRADIENT_KEYS = ['--gradient-one', '--gradient-two', '--gradient-three', '--gradient-four', '--gradient-five', '--gradient-six', '--gradient-seven'];
 const COLOR_MAP = [0, 1, 2, 0, 1, 2, 1];
 
 function buildGradientVars(colors) {
   const vars = {};
-
-  for (let index = 0; index < 7; index += 1) {
-    const color = colors[Math.min(COLOR_MAP[index], colors.length - 1)];
-    vars[GRADIENT_KEYS[index]] = `radial-gradient(at ${GRADIENT_POSITIONS[index]}, ${color} 0px, transparent 50%)`;
+  for (let i = 0; i < 7; i++) {
+    const c = colors[Math.min(COLOR_MAP[i], colors.length - 1)];
+    vars[GRADIENT_KEYS[i]] = `radial-gradient(at ${GRADIENT_POSITIONS[i]}, ${c} 0px, transparent 50%)`;
   }
-
-  vars["--gradient-base"] = `linear-gradient(${colors[0]} 0 100%)`;
+  vars['--gradient-base'] = `linear-gradient(${colors[0]} 0 100%)`;
   return vars;
 }
 
-function easeOutCubic(x) {
-  return 1 - Math.pow(1 - x, 3);
+function isLightColor(color) {
+  const value = color.trim().replace('#', '');
+  if (!/^[\da-f]{3}([\da-f]{3})?$/i.test(value)) return false;
+  const hex = value.length === 3 ? value.split('').map(char => char + char).join('') : value;
+  const red = parseInt(hex.slice(0, 2), 16);
+  const green = parseInt(hex.slice(2, 4), 16);
+  const blue = parseInt(hex.slice(4, 6), 16);
+  return red * 0.2126 + green * 0.7152 + blue * 0.0722 > 180;
 }
 
-function easeInCubic(x) {
-  return x * x * x;
-}
+function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+function easeInCubic(x) { return x * x * x; }
 
 function animateValue({ start = 0, end = 100, duration = 1000, delay = 0, ease = easeOutCubic, onUpdate, onEnd }) {
-  let rafId = 0;
-  let timeoutId = 0;
-  let stopped = false;
-  const startTime = performance.now() + delay;
-
+  const t0 = performance.now() + delay;
+  let frame = 0;
+  let cancelled = false;
   function tick() {
-    if (stopped) return;
-
-    const elapsed = performance.now() - startTime;
-    const t = Math.min(Math.max(elapsed / duration, 0), 1);
+    if (cancelled) return;
+    const elapsed = performance.now() - t0;
+    const t = Math.max(0, Math.min(elapsed / duration, 1));
     onUpdate(start + (end - start) * ease(t));
-
-    if (t < 1) rafId = requestAnimationFrame(tick);
+    if (t < 1) frame = requestAnimationFrame(tick);
     else if (onEnd) onEnd();
   }
-
-  timeoutId = window.setTimeout(() => {
-    if (!stopped) rafId = requestAnimationFrame(tick);
-  }, delay);
-
-  return () => {
-    stopped = true;
-    window.clearTimeout(timeoutId);
-    if (rafId) cancelAnimationFrame(rafId);
-  };
+  const timer = setTimeout(() => { frame = requestAnimationFrame(tick); }, delay);
+  return () => { cancelled = true; clearTimeout(timer); cancelAnimationFrame(frame); };
 }
 
-function BorderGlow({
+const BorderGlow = ({
   children,
-  className = "",
+  label,
+  as: Component = 'div',
+  preserveLayout = false,
+  className = '',
   edgeSensitivity = 30,
-  glowColor = "40 80 80",
-  backgroundColor = "#120F17",
+  glowColor = '40 80 80',
+  backgroundColor = '#120F17',
   borderRadius = 28,
   glowRadius = 40,
-  glowIntensity = 1,
+  glowIntensity = 1.0,
   coneSpread = 25,
   animated = false,
-  colors = ["#c084fc", "#f472b6", "#38bdf8"],
+  colors = ['#c084fc', '#f472b6', '#38bdf8'],
   fillOpacity = 0.5,
-}) {
+}) => {
   const cardRef = useRef(null);
+  const cancelSweepRef = useRef(() => {});
+  const interactingRef = useRef(false);
   const pointerFrameRef = useRef(0);
+  const pointerPositionRef = useRef({ x: 0, y: 0 });
+  useEffect(() => () => cancelAnimationFrame(pointerFrameRef.current), []);
 
-  const getCenterOfElement = useCallback((element) => {
-    const { width, height } = element.getBoundingClientRect();
-    return [width / 2, height / 2];
-  }, []);
-
-  const getEdgeProximity = useCallback((element, x, y) => {
-    const [cx, cy] = getCenterOfElement(element);
-    const dx = x - cx;
-    const dy = y - cy;
-    let kx = Infinity;
-    let ky = Infinity;
-
-    if (dx !== 0) kx = cx / Math.abs(dx);
-    if (dy !== 0) ky = cy / Math.abs(dy);
-
-    return Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-  }, [getCenterOfElement]);
-
-  const getCursorAngle = useCallback((element, x, y) => {
-    const [cx, cy] = getCenterOfElement(element);
-    const dx = x - cx;
-    const dy = y - cy;
-
-    if (dx === 0 && dy === 0) return 0;
-
-    const radians = Math.atan2(dy, dx);
-    let degrees = radians * (180 / Math.PI) + 90;
-    if (degrees < 0) degrees += 360;
-    return degrees;
-  }, [getCenterOfElement]);
-
-  const handlePointerMove = useCallback((event) => {
+  const handlePointerMove = useCallback((e) => {
     const card = cardRef.current;
-    if (!card) return;
-
-    const clientX = event.clientX;
-    const clientY = event.clientY;
+    if (!card || e.pointerType === 'touch') return;
+    if (!interactingRef.current) cancelSweepRef.current();
+    interactingRef.current = true;
+    pointerPositionRef.current = { x: e.clientX, y: e.clientY };
     if (pointerFrameRef.current) return;
-
     pointerFrameRef.current = requestAnimationFrame(() => {
       pointerFrameRef.current = 0;
+      if (!interactingRef.current) return;
+      // One geometry read per paint, rather than three per pointer event.
       const rect = card.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-
-      card.style.setProperty("--edge-proximity", `${(getEdgeProximity(card, x, y) * 100).toFixed(3)}`);
-      card.style.setProperty("--cursor-angle", `${getCursorAngle(card, x, y).toFixed(3)}deg`);
+      const cx = Math.max(1, rect.width / 2);
+      const cy = Math.max(1, rect.height / 2);
+      const dx = pointerPositionRef.current.x - rect.left - cx;
+      const dy = pointerPositionRef.current.y - rect.top - cy;
+      const edge = Math.min(1, Math.max(Math.abs(dx) / cx, Math.abs(dy) / cy));
+      let angle = dx === 0 && dy === 0 ? 0 : Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      if (angle < 0) angle += 360;
+      card.style.setProperty('--edge-proximity', `${Math.max(58, edge * 100).toFixed(3)}`);
+      card.style.setProperty('--cursor-angle', `${angle.toFixed(3)}deg`);
     });
-  }, [getCursorAngle, getEdgeProximity]);
+  }, []);
 
-  useEffect(() => () => {
-    if (pointerFrameRef.current) cancelAnimationFrame(pointerFrameRef.current);
+  const handlePointerLeave = useCallback(() => {
+    interactingRef.current = false;
+    cancelAnimationFrame(pointerFrameRef.current);
+    pointerFrameRef.current = 0;
+    const card = cardRef.current;
+    if (card && !card.contains(document.activeElement)) card.style.setProperty('--edge-proximity', '0');
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    cancelAnimationFrame(pointerFrameRef.current);
+    pointerFrameRef.current = 0;
+    interactingRef.current = true;
+    cancelSweepRef.current();
+    cardRef.current?.style.setProperty('--edge-proximity', '100');
+    cardRef.current?.style.setProperty('--cursor-angle', '130deg');
+  }, []);
+
+  const handleBlur = useCallback((event) => {
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    interactingRef.current = false;
+    cardRef.current?.style.setProperty('--edge-proximity', '0');
   }, []);
 
   useEffect(() => {
-    if (!animated || !cardRef.current) return undefined;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-
+    if (!animated || !cardRef.current) return;
     const card = cardRef.current;
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const angleStart = 110;
     const angleEnd = 465;
-    let cancelAnimations = [];
-    let hasPlayed = false;
-
-    const playSweep = () => {
-      if (hasPlayed) return;
-      hasPlayed = true;
-      card.classList.add("sweep-active");
-      card.style.setProperty("--cursor-angle", `${angleStart}deg`);
-
-      cancelAnimations = [
-        animateValue({ duration: 500, onUpdate: (value) => card.style.setProperty("--edge-proximity", value) }),
-        animateValue({
-          ease: easeInCubic,
-          duration: 1500,
-          end: 50,
-          onUpdate: (value) => {
-            card.style.setProperty("--cursor-angle", `${(angleEnd - angleStart) * (value / 100) + angleStart}deg`);
-          },
-        }),
-        animateValue({
-          ease: easeOutCubic,
-          delay: 1500,
-          duration: 2250,
-          start: 50,
-          end: 100,
-          onUpdate: (value) => {
-            card.style.setProperty("--cursor-angle", `${(angleEnd - angleStart) * (value / 100) + angleStart}deg`);
-          },
-        }),
-        animateValue({
-          ease: easeInCubic,
-          delay: 2500,
-          duration: 1500,
-          start: 100,
-          end: 0,
-          onUpdate: (value) => card.style.setProperty("--edge-proximity", value),
-          onEnd: () => card.classList.remove("sweep-active"),
+    let played = false;
+    let animations = [];
+    const stop = () => {
+      animations.forEach(cancel => cancel());
+      animations = [];
+      card.classList.remove('sweep-active');
+    };
+    cancelSweepRef.current = stop;
+    const play = () => {
+      if (played || motionPreference.matches) return;
+      played = true;
+      if (interactingRef.current) return;
+      card.classList.add('sweep-active');
+      card.style.setProperty('--cursor-angle', `${angleStart}deg`);
+      animations = [
+        animateValue({ duration: 500, onUpdate: v => card.style.setProperty('--edge-proximity', v) }),
+        animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => {
+          card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+        }}),
+        animateValue({ ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => {
+          card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+        }}),
+        animateValue({ ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
+          onUpdate: v => card.style.setProperty('--edge-proximity', v),
+          onEnd: () => card.classList.remove('sweep-active'),
         }),
       ];
     };
-
-    if (!("IntersectionObserver" in window)) {
-      playSweep();
-      return () => {
-        cancelAnimations.forEach((cancel) => cancel());
-        card.classList.remove("sweep-active");
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        playSweep();
-        observer.disconnect();
-      },
-      { threshold: 0.28, rootMargin: "0px 0px -12% 0px" },
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) play();
+      else { stop(); card.style.setProperty('--edge-proximity', '0'); }
+    }, { threshold: .15 });
     observer.observe(card);
-
-    return () => {
-      observer.disconnect();
-      cancelAnimations.forEach((cancel) => cancel());
-      card.classList.remove("sweep-active");
+    const onPreference = () => {
+      if (motionPreference.matches) { stop(); card.style.setProperty('--edge-proximity', '0'); }
     };
+    motionPreference.addEventListener('change', onPreference);
+    const onVisibility = () => {
+      if (document.hidden) { stop(); card.style.setProperty('--edge-proximity', '0'); }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { stop(); observer.disconnect(); motionPreference.removeEventListener('change', onPreference); document.removeEventListener('visibilitychange', onVisibility); cancelSweepRef.current = () => {}; };
   }, [animated]);
 
+  const glowVars = buildGlowVars(glowColor, glowIntensity);
+  const lightSurface = isLightColor(backgroundColor);
+
   return (
-    <div
+    <Component
       ref={cardRef}
+      aria-label={label}
+      onPointerEnter={handlePointerMove}
       onPointerMove={handlePointerMove}
-      className={`border-glow-card ${className}`.trim()}
+      onPointerLeave={handlePointerLeave}
+      onFocusCapture={handleFocus}
+      onBlurCapture={handleBlur}
+      className={`border-glow-card${lightSurface ? ' border-glow-card--light' : ''} ${className}`}
       style={{
-        "--card-bg": backgroundColor,
-        "--edge-sensitivity": edgeSensitivity,
-        "--border-radius": `${borderRadius}px`,
-        "--glow-padding": `${glowRadius}px`,
-        "--cone-spread": coneSpread,
-        "--fill-opacity": fillOpacity,
-        ...buildGlowVars(glowColor, glowIntensity),
+        '--card-bg': backgroundColor,
+        '--edge-sensitivity': edgeSensitivity,
+        '--border-radius': `${borderRadius}px`,
+        '--glow-padding': `${glowRadius}px`,
+        '--cone-spread': coneSpread,
+        '--fill-opacity': fillOpacity,
+        ...glowVars,
         ...buildGradientVars(colors),
       }}
     >
-      <span className="edge-light" />
-      <div className="border-glow-inner">{children}</div>
-    </div>
+      <span className="edge-light" aria-hidden="true" />
+      {preserveLayout ? children : <div className="border-glow-inner">{children}</div>}
+    </Component>
   );
-}
+};
 
 export default BorderGlow;

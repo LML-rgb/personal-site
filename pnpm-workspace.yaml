@@ -1,2 +1,6 @@
 allowBuilds:
   esbuild: true
+
+# pnpm 10 compatibility; pnpm 11 uses allowBuilds above.
+onlyBuiltDependencies:
+  - esbuild

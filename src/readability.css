@@ -1,0 +1,129 @@
+/* Typography and layout refinements requested in the six browser comments. */
+.hero .hero-role {
+  gap: 20px;
+  min-height: 44px;
+  color: #f5f6f7;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: .025em;
+  line-height: 1.5;
+}
+.hero .hero-chinese-name { font-size: 30px; font-weight: 700; }
+.hero .hero-role i { height: 24px; background: #b6c4d07a; }
+.hero .role-word { min-width: 190px; }
+.hero .hero-description {
+  max-width: 660px;
+  margin: 26px auto 36px;
+  color: #eef0f3;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: .025em;
+  line-height: 1.85;
+}
+.hero .hero-description span {
+  display: inline-block;
+  margin-top: 9px;
+  color: #c3cbd2;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+.hero .hero-actions .pill-button {
+  min-width: 166px;
+  padding: 16px 28px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.hero .hero-corner-right span:last-child { color: #b1b9c0; font-size: 13px; }
+
+.works-section .work-heading-row h2 {
+  font-size: clamp(38px, 4.5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.3;
+}
+.works-section .work-heading-row p { color: #d5dbe1; font-size: 16px; line-height: 1.8; }
+.works-section .work-heading-row p span { display: inline-block; margin-top: 5px; color: #adb7c1; font-size: 14px; }
+
+.process-section .section-top h2 {
+  font-size: clamp(36px, 4.1vw, 50px);
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+.process-section .section-caption { color: #bbc4cc; font-size: 16px; font-weight: 500; line-height: 1.85; }
+.process-section .eyebrow { color: #aab7c3; font-size: 12px; }
+.advantage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.advantage-grid > div { min-width: 0; }
+.advantage-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px;
+  border: 1px solid #343c44;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #181e24, #111417 70%);
+}
+.advantage-card-top { display: flex; width: 100%; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+.advantage-icon { display: grid; width: 54px; height: 54px; place-items: center; border: 1px solid #526679; border-radius: 15px; background: #263340; color: #c3d6e9; }
+.advantage-number { color: #8b9bac; font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.advantage-card h3 { margin: 0; color: #f1f4f7; font-size: clamp(21px, 2vw, 25px); font-weight: 700; letter-spacing: -.02em; line-height: 1.5; }
+.advantage-english { margin-top: 7px; color: #8b9baa; font-size: 13px; letter-spacing: .05em; }
+.advantage-card p { margin: 22px 0 26px; color: #c2cbd4; font-size: 17px; font-weight: 400; line-height: 1.9; }
+.advantage-tag { margin-top: auto; padding-top: 16px; border-top: 1px solid #323b45; width: 100%; color: #a7c2dc; font-size: 14px; font-weight: 500; letter-spacing: .025em; line-height: 1.7; }
+
+.contact-section .contact-phone {
+  align-items: center;
+  gap: 12px;
+  margin-top: 9px;
+  color: #e2e9ef;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: .065em;
+}
+.contact-section .contact-phone svg { width: 23px; height: 23px; color: #b6c8da; }
+.contact-section .contact-phone:hover { color: #fff; }
+
+@media (max-width: 900px) {
+  .work-heading-row { align-items: flex-start; }
+  .works-section .work-heading-row p { max-width: 320px; }
+  .advantage-card { padding: 27px; }
+  .advantage-card h3 { font-size: 22px; }
+  .advantage-card p { font-size: 16px; }
+}
+@media (max-width: 700px) {
+  .hero .hero-content { padding-left: 22px; padding-right: 22px; }
+  .hero .hero-role { gap: 13px; min-height: 36px; font-size: 17px; }
+  .hero .hero-chinese-name { font-size: 25px; }
+  .hero .hero-role i { height: 20px; }
+  .hero .role-word { min-width: 139px; }
+  .hero .hero-description { max-width: 355px; margin: 24px auto 30px; font-size: 17px; line-height: 1.85; letter-spacing: 0; }
+  .hero .hero-description span { margin-top: 9px; font-size: 15px; line-height: 1.85; letter-spacing: 0; }
+  .hero .hero-actions { gap: 12px; }
+  .hero .hero-actions .pill-button { min-width: 0; padding: 14px 22px; font-size: 15px; gap: 18px; }
+  .works-section .work-heading-row h2 { font-size: 38px; }
+  .works-section .work-heading-row p { max-width: none; font-size: 16px; }
+  .works-section .work-heading-row p span { font-size: 14px; }
+  .process-section .section-top { align-items: flex-start; flex-direction: column; gap: 20px; }
+  .process-section .section-top h2 { font-size: 36px; }
+  .process-section .section-caption { text-align: left; font-size: 16px; }
+  .process-section .section-caption br { display: none; }
+  .process-section .eyebrow { font-size: 10px; }
+  .advantage-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .advantage-card { padding: 26px 24px; }
+  .advantage-card-top { margin-bottom: 20px; }
+  .advantage-card h3 { font-size: 23px; }
+  .advantage-card p { margin-top: 19px; font-size: 16px; line-height: 1.9; }
+  .advantage-english { font-size: 12px; }
+  .contact-section .contact-phone { font-size: 23px; gap: 10px; letter-spacing: .05em; }
+  .contact-section .contact-phone svg { width: 21px; height: 21px; }
+}
+@media (max-width: 380px) {
+  .hero .hero-role { gap: 10px; font-size: 16px; }
+  .hero .hero-chinese-name { font-size: 23px; }
+  .hero .role-word { min-width: 130px; }
+  .hero .hero-actions .pill-button { padding-left: 18px; padding-right: 18px; }
+  .advantage-card { padding-left: 20px; padding-right: 20px; }
+  .advantage-card h3 { font-size: 21px; }
+}

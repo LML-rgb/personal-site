@@ -1,0 +1,27 @@
+.border-glow-card.glow-card {
+  min-width: 0;
+  transition: transform .32s cubic-bezier(.2, .7, .3, 1), box-shadow .32s ease, border-color .32s ease;
+  box-shadow: 0 8px 24px #0003;
+}
+.border-glow-card.glow-card:focus-within {
+  border-color: #98b8d3;
+  box-shadow: 0 14px 35px #0007, 0 0 22px #86b2d41a;
+}
+@media (hover: hover) and (pointer: fine) {
+  .border-glow-card.glow-card:hover {
+    transform: translate3d(0, -7px, .01px);
+    border-color: #8daec8a6;
+    box-shadow: 0 20px 42px #0008, 0 0 28px #86b2d41c;
+  }
+  .border-glow-card.glow-card .glow-card:hover { transform: translate3d(0, -3px, .01px); }
+}
+@media (hover: none) {
+  .border-glow-card.glow-card:not(.sweep-active):not(:focus-within)::before,
+  .border-glow-card.glow-card:not(.sweep-active):not(:focus-within)::after,
+  .border-glow-card.glow-card:not(.sweep-active):not(:focus-within) > .edge-light { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-glow-card.glow-card,
+  .border-glow-card.glow-card:hover,
+  .border-glow-card.glow-card .glow-card:hover { transform: none; transition: none; }
+}

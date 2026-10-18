@@ -5,3 +5,12 @@ dist
 source-assets/
 *.mp4
 *.mov
+.sites-runtime/
+.openai/
+tmp/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+.wrangler/
